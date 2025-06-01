@@ -1,12 +1,13 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
+from geometry_msgs.msg import Point
 
-from utils import BlockState
+from buildlings_utils.utils import BlockState
 # custom worldstate message
 from buildlings_msgs.msg import WorldState
 
-class WorldState(Node):
+class WorldStateNode(Node):
     def __init__(self):
         # init basic node with name
         super().__init__('world_state')
@@ -35,8 +36,11 @@ class WorldState(Node):
 
     def timer_callback(self):
         msg = WorldState()
-        msg.goal_coord = self.goal_coord
-        msg.grid_state = [[state.value for state in row] for row in self.grid]
+        temp_point = Point()
+        temp_point.x = float(self.goal_coord[0])
+        temp_point.y = float(self.goal_coord[1])
+        msg.goal_coord = temp_point
+        msg.grid_state = [''.join(str(state.value) for state in row) for row in self.grid]
         # TODO: implement later...
         msg.agent_states = []
         
@@ -47,7 +51,7 @@ class WorldState(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    node = WorldState()
+    node = WorldStateNode()
 
     # starts timer, which triggers the timer_callback
     rclpy.spin(node)
