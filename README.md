@@ -8,5 +8,9 @@ I made a [template](https://github.com/lemonlemonde/gazebo-ros2-docker-template)
 There are some git submodules, and they should all be working, but if at any time need to update them...
 
 ```shell
+# initial clone
+git submodule update --init --recursive
+
+# updates
 git submodule update --remote --merge
 ```
