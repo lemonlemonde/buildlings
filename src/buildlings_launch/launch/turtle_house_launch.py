@@ -27,6 +27,25 @@ def generate_launch_description():
     robot_state_publisher_launch = os.path.join(turtle_pkg, 'launch', 'robot_state_publisher.launch.py')
     spawn_turtlebot_launch = os.path.join(turtle_pkg, 'launch', 'spawn_turtlebot3.launch.py')
 
+    # spawn the target aruco marker box
+    aruco_box_path = os.path.join(
+        get_package_share_directory('buildlings_launch'),
+        'models',
+        'aruco_box',
+        'model.sdf'
+    )
+    spawn_marker_box = Node(
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        arguments=[
+            '-entity', 'aruco_box',
+            '-file', aruco_box_path,
+            '-x', '1.0',
+            '-y', '0.0',
+            '-z', '0.1'
+        ],
+        output='screen'
+    )
 
     # format the expected launch description
     return LaunchDescription([
@@ -57,11 +76,6 @@ def generate_launch_description():
             }.items(),
         ),
 
-        # # Start your teleop/drive/control node here if you want
-        # Node(
-        #     package='my_custom_control_pkg',
-        #     executable='my_control_node',
-        #     name='my_control_node',
-        #     output='screen'
-        # ),
+        spawn_marker_box
+
     ])
