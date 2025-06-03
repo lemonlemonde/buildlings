@@ -2,7 +2,30 @@
 
 Fun project..? where little robots in ROS2 are able to reach goal locations in a 2D grid world by creating bridges. Hopefully.
 
-I made a [template](https://github.com/lemonlemonde/gazebo-ros2-docker-template) that this is built on. 
+I made a [Docker container template for ROS2 (humble) and Gazebo](https://github.com/lemonlemonde/gazebo-ros2-docker-template) that this is built on. 
+
+## Quick Start
+1. Set up with the template instructions (above)
+2. Clone this?
+3. Set up with [ROS2](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html) 
+4. Set up your bashrc (below)
+5. `ros2 launch buildlings_launch turtle_house_launch.py`
+6. ...
+
+7. (In development:) Run the other SLAM, cartographer, etc........
+
+## .bashrc
+These should be the only things convenient to add to your `.bashrc`.
+Everything else is set up in the launch file.
+```bashrc
+# Source ROS 2 Humble setup (adjust if different)
+source /opt/ros/humble/setup.bash
+
+# Load your own workspace if it exists
+if [ -f ~/buildlings/install/setup.bash ]; then
+  source ~/buildlings/install/setup.bash
+fi
+```
 
 ## Dependencies
 There are some git submodules, and they should all be working, but if at any time need to update them...
