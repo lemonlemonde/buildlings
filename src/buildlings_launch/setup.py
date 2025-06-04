@@ -14,12 +14,15 @@ setup(
         ('share/' + package_name, ['package.xml']),
         # launch file
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
+        # aruco box model
         ('share/' + package_name + '/models/aruco_box', 
             ['models/aruco_box/model.config', 'models/aruco_box/model.sdf']),
         ('share/' + package_name + '/models/aruco_box/materials/scripts', 
             ['models/aruco_box/materials/scripts/aruco_cube.material']),
         ('share/' + package_name + '/models/aruco_box/materials/textures', 
             ['models/aruco_box/materials/textures/aruco_42.png']),
+        # params
+        (os.path.join('share', package_name, 'params'), glob('params/*.yaml')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

@@ -1,0 +1,13 @@
+/**:
+  ros__parameters:
+    robot_base_frame: base_link
+    costmap_topic: map
+    costmap_updates_topic: map_updates
+    visualize: true
+    planner_frequency: 1.0 # increase freq Hz for planner (default 0.25)
+    progress_timeout: 80.0 # time for recovery if fall (default 30.0)
+    potential_scale: 3.0 # decrease, less aggressive movement (default 3.0)
+    orientation_scale: 0.0
+    gain_scale: 2.5 # increase, prioritize frontiers farther away (default 1.0)
+    transform_tolerance: 0.3
+    min_frontier_size: 0.2 # decrease, explore smaller frontiers (default 0.75)

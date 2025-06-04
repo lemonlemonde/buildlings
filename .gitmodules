@@ -14,3 +14,11 @@
 	path = src/turtlebot3_simulations
 	url = https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
 	branch = humble
+[submodule "m-explore-ros2"]
+	path = m-explore-ros2
+	url = git@github.com:robo-friends/m-explore-ros2.git
+	branch = feature/slam_toolbox_compat
+[submodule "src/m-explore-ros2"]
+	path = src/m-explore-ros2
+	url = git@github.com:robo-friends/m-explore-ros2.git
+	branch = feature/slam_toolbox_compat
