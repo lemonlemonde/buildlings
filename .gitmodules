@@ -26,3 +26,7 @@
 	path = src/turtlebot3_applications
 	url = git@github.com:ROBOTIS-GIT/turtlebot3_applications.git
 	branch = humble
+[submodule "src/turtlebot3_applications_msgs"]
+	path = src/turtlebot3_applications_msgs
+	url = git@github.com:ROBOTIS-GIT/turtlebot3_applications_msgs.git
+	branch = humble
