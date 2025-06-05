@@ -9,11 +9,11 @@ I made a [Docker container template for ROS2 (humble) and Gazebo](https://github
 2. Clone this?
 3. Set up with [ROS2](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html) 
 4. Set up your bashrc (below)
-5. `ros2 launch fetchlings turtle_house_launch.py map_dir:=/home/mousey/fetchlings/aruco_dict.yaml` (cannot be in virtual env???)
+5. `ros2 launch fetchlings turtle_house_launch.py num_robots:=5 map_dir:=/home/mousey/fetchlings/aruco_dict.yaml` (cannot be in virtual env???)
   - `map_dir` will default to `~/aruco_dict.yaml` if unspecified
+  - `num_robots` is 1-6 for now
 6. ...
 
-7. (In development:) Run the other SLAM, cartographer, etc........
 
 ## .bashrc
 These should be the only things convenient to add to your `.bashrc`.

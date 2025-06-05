@@ -24,17 +24,20 @@ def generate_launch_description():
     declare_map_dir_arg = DeclareLaunchArgument(
         "map_dir", default_value=os.path.join(os.path.expanduser('~'), 'aruco_dict.yaml'), description="Directory and file name to save maps and markers"
     )
+    declare_num_robots_arg = DeclareLaunchArgument(
+        "num_robots", default_value='2', description="Number of robots to spawn"
+    )
     
-    # spawn turtle here
-    x_pose = LaunchConfiguration('x_pose', default='-4.5')
-    y_pose = LaunchConfiguration('y_pose', default='3.0')
-    z_pose = LaunchConfiguration('z_pose', default='0.1')
+    # # spawn turtle here
+    # x_pose = LaunchConfiguration('x_pose', default='-4.5')
+    # y_pose = LaunchConfiguration('y_pose', default='3.0')
+    # z_pose = LaunchConfiguration('z_pose', default='0.1')
     
     # all the preconfigged launch files
     gzserver_launch = os.path.join(gazebo_pkg, 'launch', 'gzserver.launch.py')
     gzclient_launch = os.path.join(gazebo_pkg, 'launch', 'gzclient.launch.py')
     robot_state_publisher_launch = os.path.join(turtle_pkg, 'launch', 'robot_state_publisher.launch.py')
-    spawn_turtlebot_launch = os.path.join(turtle_pkg, 'launch', 'spawn_turtlebot3.launch.py')
+    spawn_turtlebots_launch = os.path.join(cur_pkg, 'launch', 'multi_robot_launch.py')
     nav2_launch = os.path.join(nav2_pkg, 'launch', 'navigation2.launch.py')
     slam_tlbx_launch = os.path.join(slam_tlbx_pkg, 'launch', 'online_async_launch.py')
     aruco_tracker_launch = os.path.join(aruco_tracker_pkg, 'launch', 'turtlebot3_aruco_tracker.launch.py')
@@ -128,6 +131,7 @@ def generate_launch_description():
 
         # map dir arg
         declare_map_dir_arg,
+        declare_num_robots_arg,
         
         # launch gazebo server via their own launch file
         IncludeLaunchDescription(
@@ -143,16 +147,18 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(robot_state_publisher_launch),
             launch_arguments={'use_sim_time': 'true'}.items(),
         ),
-        # actual turtle via their own launch file
+
+        
+        # actual turtles via their own launch file
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(spawn_turtlebot_launch),
+            PythonLaunchDescriptionSource(spawn_turtlebots_launch),
             launch_arguments={
-                'x_pose': x_pose,
-                'y_pose': y_pose,
-                'z_pose': z_pose,
+                'num_robots': LaunchConfiguration('num_robots'),
                 'use_sim_time': 'true',
             }.items(),
         ),
+
+        # spawn aruco box model in env
         spawn_aruco_box,
 
         # slam

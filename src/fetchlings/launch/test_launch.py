@@ -11,8 +11,8 @@ def generate_launch_description():
     
     cur_pkg = get_package_share_directory('fetchlings')
 
-    declare_map_dir_arg = DeclareLaunchArgument(
-        "map_dir", default_value=os.path.join(os.path.expanduser('~'), 'aruco_dict.yaml'), description="Directory and file name to save maps and markers"
+    declare_num_robots_arg = DeclareLaunchArgument(
+        "num_robots", default_value='2', description="Number of robots to spawn"
     )
 
     # Set Gazebo model path to include your models directory (for Gazebo Classic)
@@ -34,15 +34,16 @@ def generate_launch_description():
         value="30"
     )
 
-    aruco_listener_node = Node(
-        package="fetchlings",
-        executable="aruco_listener",
-        name="aruco_listener",
-        output="screen",
-        parameters=[{
-            'map_dir': LaunchConfiguration('map_dir')
-        }]
-    )
+    spawn_turtlebots_launch = os.path.join(cur_pkg, 'launch', 'multi_robot_launch.py')
+    # aruco_listener_node = Node(
+    #     package="fetchlings",
+    #     executable="aruco_listener",
+    #     name="aruco_listener",
+    #     output="screen",
+    #     parameters=[{
+    #         'map_dir': LaunchConfiguration('map_dir')
+    #     }]
+    # )
     
 
     
@@ -53,7 +54,13 @@ def generate_launch_description():
         set_turtlebot3_model,
         set_ros_domain_id,
 
-        declare_map_dir_arg,
+        declare_num_robots_arg,
         
-        aruco_listener_node
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(spawn_turtlebots_launch),
+            launch_arguments={
+                'num_robots': LaunchConfiguration('num_robots'),
+                'use_sim_time': 'true',
+            }.items(),
+        ),
     ])
