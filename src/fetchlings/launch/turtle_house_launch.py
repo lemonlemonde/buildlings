@@ -1,7 +1,7 @@
 
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable, TimerAction
+from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable, DeclareLaunchArgument
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
@@ -14,11 +14,14 @@ def generate_launch_description():
     turtle_pkg = get_package_share_directory('turtlebot3_gazebo')
     nav2_pkg = get_package_share_directory('turtlebot3_navigation2')
     slam_tlbx_pkg = get_package_share_directory('slam_toolbox')
-    explore_pkg = get_package_share_directory('explore_lite')
     world_path = os.path.join(
         turtle_pkg, 
         'worlds', 
         'turtlebot3_house.world'
+    )
+
+    declare_map_dir_arg = DeclareLaunchArgument(
+        "map_dir", default_value=os.path.join(os.path.expanduser('~'), 'aruco_dict.yaml'), description="Directory and file name to save maps and markers"
     )
     
     # spawn turtle here
@@ -102,11 +105,15 @@ def generate_launch_description():
 
     # aruco listener
     aruco_listener_node = Node(
-        package="fletchlings",
+        package="fetchlings",
         executable="aruco_listener",
         name="aruco_listener",
         output="screen",
+        parameters=[{
+            'map_dir': LaunchConfiguration('map_dir')
+        }]
     )
+    
 
 
     
@@ -116,6 +123,9 @@ def generate_launch_description():
         set_gazebo_model_path,
         set_turtlebot3_model,
         set_ros_domain_id,
+
+        # map dir arg
+        declare_map_dir_arg,
         
         # launch gazebo server via their own launch file
         IncludeLaunchDescription(
@@ -162,5 +172,9 @@ def generate_launch_description():
 
         # m-explore-ros2
         explore_node,
+
+        # listens and saves marker yaml
+        aruco_listener_node
+        
 
     ])

@@ -23,6 +23,9 @@ setup(
             ['models/aruco_box/materials/textures/aruco_42_5x5_250.png']),
         # params
         (os.path.join('share', package_name, 'params'), glob('params/*.yaml')),
+        # maps
+        (os.path.join('share', package_name, 'maps'), glob('maps/*.*')),
+
     ],
     install_requires=['setuptools'],
     zip_safe=True,
