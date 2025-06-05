@@ -1,0 +1,12 @@
+ar_marker_42: !!python/object:fetchlings.aruco_marker.ArucoMarker
+  coord_x: -4.150375111742105
+  coord_y: 2.9930671957266237
+  coord_z: 0.0936932734170166
+  fixed_frame_id: map
+  obj_frame_id: ar_marker_42
+  rot_w: 0.4243741774399308
+  rot_x: 0.6269843258821811
+  rot_y: -0.5320019769123322
+  rot_z: -0.379171609145014
+  time_sec: 75
+  time_usec: 909000000
