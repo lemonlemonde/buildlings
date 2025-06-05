@@ -6,7 +6,7 @@ material ArucoCube/Diffuse
     {
       texture_unit
       {
-        texture ../textures/aruco_42.png
+        texture ../textures/aruco_42_5x5_250.png
         tex_address_mode wrap
         scale 1.0 1.0
         colour_op modulate

@@ -20,7 +20,7 @@ setup(
         ('share/' + package_name + '/models/aruco_box/materials/scripts', 
             ['models/aruco_box/materials/scripts/aruco_cube.material']),
         ('share/' + package_name + '/models/aruco_box/materials/textures', 
-            ['models/aruco_box/materials/textures/aruco_42.png']),
+            ['models/aruco_box/materials/textures/aruco_42_5x5_250.png']),
         # params
         (os.path.join('share', package_name, 'params'), glob('params/*.yaml')),
     ],

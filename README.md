@@ -9,7 +9,7 @@ I made a [Docker container template for ROS2 (humble) and Gazebo](https://github
 2. Clone this?
 3. Set up with [ROS2](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html) 
 4. Set up your bashrc (below)
-5. `ros2 launch buildlings_launch turtle_house_launch.py`
+5. `ros2 launch buildlings_launch turtle_house_launch.py` (cannot be in virtual env???)
 6. ...
 
 7. (In development:) Run the other SLAM, cartographer, etc........
@@ -28,7 +28,9 @@ fi
 ```
 
 ## Dependencies
-There are some git submodules, and they should all be working, but if at any time need to update them...
+`pip install scipy opencv-contrib-python catkin_pkg "empy<4" "lark-parser>=0.11,<1.2"`
+
+There are also some git submodules, and they should all be working, but if at any time need to update them...
 
 ```shell
 # initial clone

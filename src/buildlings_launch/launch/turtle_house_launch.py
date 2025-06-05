@@ -64,7 +64,7 @@ def generate_launch_description():
         executable='spawn_entity.py',
         arguments=['-entity', 'aruco_box', 
                   '-database', 'aruco_box',
-                  '-x', '2.0', '-y', '2.0', '-z', '1.0'],  # Moved away from turtle spawn
+                  '-x', '-4.0', '-y', '3.0', '-z', '1.0'],  # Moved away from turtle spawn
         output='screen'
     )
 
