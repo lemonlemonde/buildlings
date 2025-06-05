@@ -33,6 +33,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'aruco_listener = fetchlings.aruco_listener:main',
         ],
     },
 )

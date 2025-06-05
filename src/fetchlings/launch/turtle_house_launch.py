@@ -100,25 +100,15 @@ def generate_launch_description():
         remappings=[("/tf", "tf"), ("/tf_static", "tf_static")]
     )
 
-    # explore_node = Node(
-    #     package='explore_lite',
-    #     executable='explore',
-    #     parameters=[{
-    #         'use_sim_time': True,
-    #         'planner_frequency': 0.33,
-    #         'progress_timeout': 30.0,  # Increase if robot gets stuck
-    #         'potential_scale': 3.0,
-    #         'gain_scale': 1.0,
-    #         'min_frontier_size': 0.4,  # Lower = more sensitive
-    #         'visualize': True
-    #     }],
-    #     output='screen'
-    # )
-    # # 10 sec?
-    # delayed_explore_node = TimerAction(
-    #     period=70.0, 
-    #     actions=[explore_node]
-    # )
+    # aruco listener
+    aruco_listener_node = Node(
+        package="fletchlings",
+        executable="aruco_listener",
+        name="aruco_listener",
+        output="screen",
+    )
+
+
     
     # format the expected launch description
     return LaunchDescription([
@@ -171,6 +161,6 @@ def generate_launch_description():
         ),
 
         # m-explore-ros2
-        explore_node
+        explore_node,
 
     ])
