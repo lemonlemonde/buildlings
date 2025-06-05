@@ -1,3 +1,4 @@
+
 class ArucoMarker:
     def __init__(self, t):
 
@@ -36,20 +37,12 @@ class ArucoMarker:
             #         float64 z
             #         float64 w
 
-    def to_dict(self):
-        return {
-            'time_sec': self.time_sec,
-            'time_usec': self.time_usec,
+    
+# for yaml load
+def arucomarker_constructor(loader, node):
+    values = loader.construct_mapping(node)
+    return ArucoMarker(**values)
 
-            'fixed_frame_id': self.fixed_frame_id,
-            'obj_frame_id': self.obj_frame_id,
-
-            'coord_x': self.coord_x,
-            'coord_y': self.coord_y,
-            'coord_z': self.coord_z,
-
-            'rot_x': self.rot_x,
-            'rot_y': self.rot_y,
-            'rot_z': self.rot_z,
-            'rot_w': self.rot_w
-        }
+# for yaml dump
+def arucomarker_representer(dumper, data):
+    return dumper.represent_mapping('!ArucoMarker', data.__dict__)

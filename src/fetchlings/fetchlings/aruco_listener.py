@@ -10,7 +10,7 @@ from ament_index_python.packages import get_package_share_directory
 import os
 import yaml
 
-from fetchlings.aruco_marker import ArucoMarker
+from fetchlings.aruco_marker import ArucoMarker, arucomarker_constructor, arucomarker_representer
 
 from rclpy.impl import rcutils_logger
 
@@ -24,12 +24,17 @@ class ArucoListener(Node):
         self.target_frame = self.declare_parameter(
           'target_frame', 'ar_marker_42').get_parameter_value().string_value
         
+        # yaml config
+        yaml.add_constructor('!ArucoMarker', arucomarker_constructor)
+        yaml.add_representer(ArucoMarker, arucomarker_representer)
+        
         # load or make dict of ArucoMarkers
         self.aruco_file_path = self.declare_parameter('map_dir', os.path.join(os.path.expanduser('~'), 'aruco_dict.yaml'))
         self.aruco_dict = {}
-        if os.path.exists(self.aruco_file_path.value):
-            with open(self.aruco_file_path.value, 'r') as f:
-                self.aruco_dict = yaml.load(f)
+        if os.path.exists(os.path.expanduser(self.aruco_file_path.value)):
+            with open(os.path.expanduser(self.aruco_file_path.value), 'r') as f:
+                self.get_logger().debug(f'Loading existing ArUco dict file: {os.path.expanduser(self.aruco_file_path.value)}')
+                self.aruco_dict = yaml.load(f, Loader=yaml.Loader)
 
         # buffer to store most recent transforms
         self.tf_buffer = Buffer(cache_time=Duration(seconds=10))
@@ -40,7 +45,7 @@ class ArucoListener(Node):
 
     def cleanup(self):
         # write updated dict into yaml
-        with open(self.aruco_file_path.value, 'w') as f:
+        with open(os.path.expanduser(self.aruco_file_path.value), 'w') as f:
             yaml.dump(self.aruco_dict, f)
 
     def on_timer(self):

@@ -34,8 +34,6 @@ def generate_launch_description():
         value="30"
     )
 
-
-    # aruco listener
     aruco_listener_node = Node(
         package="fetchlings",
         executable="aruco_listener",
@@ -45,7 +43,7 @@ def generate_launch_description():
             'map_dir': LaunchConfiguration('map_dir')
         }]
     )
-
+    
 
     
     # format the expected launch description

@@ -14,6 +14,7 @@ def generate_launch_description():
     turtle_pkg = get_package_share_directory('turtlebot3_gazebo')
     nav2_pkg = get_package_share_directory('turtlebot3_navigation2')
     slam_tlbx_pkg = get_package_share_directory('slam_toolbox')
+    aruco_tracker_pkg = get_package_share_directory('turtlebot3_aruco_tracker')
     world_path = os.path.join(
         turtle_pkg, 
         'worlds', 
@@ -36,6 +37,7 @@ def generate_launch_description():
     spawn_turtlebot_launch = os.path.join(turtle_pkg, 'launch', 'spawn_turtlebot3.launch.py')
     nav2_launch = os.path.join(nav2_pkg, 'launch', 'navigation2.launch.py')
     slam_tlbx_launch = os.path.join(slam_tlbx_pkg, 'launch', 'online_async_launch.py')
+    aruco_tracker_launch = os.path.join(aruco_tracker_pkg, 'launch', 'turtlebot3_aruco_tracker.launch.py')
 
     # params files
     nav2_params_path = os.path.join(cur_pkg, 'params', 'nav2_waffle_pi.yaml')
@@ -173,8 +175,15 @@ def generate_launch_description():
         # m-explore-ros2
         explore_node,
 
+        # aruco tracker
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(aruco_tracker_launch),
+            launch_arguments={
+                'marker_size': '0.2'
+            }.items()
+        ),
+
         # listens and saves marker yaml
         aruco_listener_node
-        
 
     ])
