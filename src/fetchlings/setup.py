@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 import os
 from glob import glob
 
-package_name = 'buildlings_launch'
+package_name = 'fetchlings'
 
 setup(
     name=package_name,

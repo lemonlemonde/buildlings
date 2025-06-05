@@ -9,7 +9,7 @@ import os
 
 def generate_launch_description():
     
-    cur_pkg = get_package_share_directory('buildlings_launch')
+    cur_pkg = get_package_share_directory('fetchlings')
     gazebo_pkg = get_package_share_directory('gazebo_ros')
     turtle_pkg = get_package_share_directory('turtlebot3_gazebo')
     nav2_pkg = get_package_share_directory('turtlebot3_navigation2')
@@ -39,9 +39,8 @@ def generate_launch_description():
     explore_params_path = os.path.join(cur_pkg, "params", "explore_params.yaml")
 
     
-    # Set Gazebo model path to include your models directory (CORRECT for Gazebo Classic)
-    pkg_dir = get_package_share_directory('buildlings_launch')
-    gazebo_model_path = os.path.join(pkg_dir, 'models')
+    # Set Gazebo model path to include your models directory (for Gazebo Classic)
+    gazebo_model_path = os.path.join(cur_pkg, 'models')
     set_gazebo_model_path = SetEnvironmentVariable(
         name='GAZEBO_MODEL_PATH',
         value=gazebo_model_path + ':' + "/opt/ros/humble/share/turtlebot3_gazebo/models/" + ":" + os.environ.get('GAZEBO_MODEL_PATH', '')

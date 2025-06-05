@@ -9,7 +9,7 @@ I made a [Docker container template for ROS2 (humble) and Gazebo](https://github
 2. Clone this?
 3. Set up with [ROS2](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html) 
 4. Set up your bashrc (below)
-5. `ros2 launch buildlings_launch turtle_house_launch.py` (cannot be in virtual env???)
+5. `ros2 launch fetchlings turtle_house_launch.py` (cannot be in virtual env???)
 6. ...
 
 7. (In development:) Run the other SLAM, cartographer, etc........
@@ -22,8 +22,8 @@ Everything else is set up in the launch file.
 source /opt/ros/humble/setup.bash
 
 # Load your own workspace if it exists
-if [ -f ~/buildlings/install/setup.bash ]; then
-  source ~/buildlings/install/setup.bash
+if [ -f ~/fetchlings/install/setup.bash ]; then
+  source ~/fetchlings/install/setup.bash
 fi
 ```
 
