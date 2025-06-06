@@ -23,8 +23,8 @@ def generate_launch_description():
     cur_pkg = get_package_share_directory('fetchlings')
     gazebo_pkg = get_package_share_directory('gazebo_ros')
     turtle_pkg = get_package_share_directory('turtlebot3_gazebo')
-    nav2_pkg = get_package_share_directory('turtlebot3_navigation2')
-    slam_tlbx_pkg = get_package_share_directory('slam_toolbox')
+    # nav2_pkg = get_package_share_directory('turtlebot3_navigation2')
+    # slam_tlbx_pkg = get_package_share_directory('slam_toolbox')
     aruco_tracker_pkg = get_package_share_directory('turtlebot3_aruco_tracker')
     world_path = os.path.join(
         turtle_pkg, 
@@ -47,14 +47,14 @@ def generate_launch_description():
     # all the preconfigged launch files
     gzserver_launch = os.path.join(gazebo_pkg, 'launch', 'gzserver.launch.py')
     gzclient_launch = os.path.join(gazebo_pkg, 'launch', 'gzclient.launch.py')
-    spawn_turtlebots_launch = os.path.join(cur_pkg, 'launch', 'multi_robot_launch.py')
-    nav2_launch = os.path.join(nav2_pkg, 'launch', 'navigation2.launch.py')
-    slam_tlbx_launch = os.path.join(slam_tlbx_pkg, 'launch', 'online_async_launch.py')
+    spawn_turtlebots_launch = os.path.join(cur_pkg, 'launch', 'merged_2.py')
+    # nav2_launch = os.path.join(nav2_pkg, 'launch', 'navigation2.launch.py')
+    # slam_tlbx_launch = os.path.join(slam_tlbx_pkg, 'launch', 'online_async_launch.py')
     aruco_tracker_launch = os.path.join(aruco_tracker_pkg, 'launch', 'turtlebot3_aruco_tracker.launch.py')
 
     # params files
-    nav2_params_path = os.path.join(cur_pkg, 'params', 'nav2_waffle_pi.yaml')
-    explore_params_path = os.path.join(cur_pkg, "params", "explore_params.yaml")
+    # nav2_params_path = os.path.join(cur_pkg, 'params', 'nav2_waffle_pi.yaml')
+    # explore_params_path = os.path.join(cur_pkg, "params", "explore_params.yaml")
 
     
     # Set Gazebo model path to include your models directory (for Gazebo Classic)
@@ -86,24 +86,24 @@ def generate_launch_description():
     )
 
     # m-explore-ros2
-    explore_node = Node(
-        package="explore_lite",
-        executable="explore",
-        name="explore_node",
-        output="screen",
-        parameters=[
-            explore_params_path,  # base config
-            {
-                'use_sim_time': True,
-                'potential_scale': 3.0, # decrease, less aggressive movement
-                'gain_scale': 2.5, # increase, prioritize frontiers farther away
-                'min_frontier_size': 0.1, # decrease, explore smaller frontiers
-                'progress_timeout': 80.0, # time for recovery if fall
-                'planner_frequency': 1.0, # increase freq Hz for planner
-            }
-        ],
-        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")]
-    )
+    # explore_node = Node(
+    #     package="explore_lite",
+    #     executable="explore",
+    #     name="explore_node",
+    #     output="screen",
+    #     parameters=[
+    #         explore_params_path,  # base config
+    #         {
+    #             'use_sim_time': True,
+    #             'potential_scale': 3.0, # decrease, less aggressive movement
+    #             'gain_scale': 2.5, # increase, prioritize frontiers farther away
+    #             'min_frontier_size': 0.1, # decrease, explore smaller frontiers
+    #             'progress_timeout': 80.0, # time for recovery if fall
+    #             'planner_frequency': 1.0, # increase freq Hz for planner
+    #         }
+    #     ],
+    #     remappings=[("/tf", "tf"), ("/tf_static", "tf_static")]
+    # )
 
     # aruco listener
     aruco_listener_node = Node(
@@ -143,16 +143,16 @@ def generate_launch_description():
         # spawn aruco box model in env
         spawn_aruco_box,
 
+        # actual turtles via their own launch file
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(spawn_turtlebots_launch),
+            launch_arguments={
+                'num_robots': LaunchConfiguration('num_robots'),
+                'use_sim_time': 'true',
+            }.items(),
+        ),
         # ==================== ALL OF BELOW PRESUMABLY
         # ==================== REPLACED BY MULTI_ROBOT_LAUNCH.PY?????
-        # # actual turtles via their own launch file
-        # IncludeLaunchDescription(
-        #     PythonLaunchDescriptionSource(spawn_turtlebots_launch),
-        #     launch_arguments={
-        #         'num_robots': LaunchConfiguration('num_robots'),
-        #         'use_sim_time': 'true',
-        #     }.items(),
-        # ),
 
 
         # # slam

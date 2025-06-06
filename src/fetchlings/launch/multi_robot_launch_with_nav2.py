@@ -159,108 +159,108 @@ def generate_launch_description():
         output="screen",
     )
 
-    # Define commands for spawing the robots into Gazebo
-    spawn_robots_cmds = []
-    for robot_known, robot_unknown in zip(robots_known_poses, robots_unknown_poses):
-        spawn_robots_cmds.append(
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    os.path.join(bringup_dir, "launch", "spawn_tb3_launch.py")
-                ),
-                launch_arguments={
-                    "x_pose": TextSubstitution(text=str(robot_known["x_pose"])),
-                    "y_pose": TextSubstitution(text=str(robot_known["y_pose"])),
-                    "z_pose": TextSubstitution(text=str(robot_known["z_pose"])),
-                    "robot_name": robot_known["name"],
-                    "turtlebot_type": TextSubstitution(text="waffle"),
-                }.items(),
-                condition=IfCondition(known_init_poses),
-            )
-        )
-        spawn_robots_cmds.append(
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    os.path.join(bringup_dir, "launch", "spawn_tb3_launch.py")
-                ),
-                launch_arguments={
-                    "x_pose": TextSubstitution(text=str(robot_unknown["x_pose"])),
-                    "y_pose": TextSubstitution(text=str(robot_unknown["y_pose"])),
-                    "z_pose": TextSubstitution(text=str(robot_unknown["z_pose"])),
-                    "robot_name": robot_unknown["name"],
-                    "turtlebot_type": TextSubstitution(text="waffle"),
-                }.items(),
-                condition=UnlessCondition(known_init_poses),
-            )
-        )
+    # # Define commands for spawing the robots into Gazebo
+    # spawn_robots_cmds = []
+    # for robot_known, robot_unknown in zip(robots_known_poses, robots_unknown_poses):
+    #     spawn_robots_cmds.append(
+    #         IncludeLaunchDescription(
+    #             PythonLaunchDescriptionSource(
+    #                 os.path.join(bringup_dir, "launch", "spawn_tb3_launch.py")
+    #             ),
+    #             launch_arguments={
+    #                 "x_pose": TextSubstitution(text=str(robot_known["x_pose"])),
+    #                 "y_pose": TextSubstitution(text=str(robot_known["y_pose"])),
+    #                 "z_pose": TextSubstitution(text=str(robot_known["z_pose"])),
+    #                 "robot_name": robot_known["name"],
+    #                 "turtlebot_type": TextSubstitution(text="waffle"),
+    #             }.items(),
+    #             condition=IfCondition(known_init_poses),
+    #         )
+    #     )
+    #     spawn_robots_cmds.append(
+    #         IncludeLaunchDescription(
+    #             PythonLaunchDescriptionSource(
+    #                 os.path.join(bringup_dir, "launch", "spawn_tb3_launch.py")
+    #             ),
+    #             launch_arguments={
+    #                 "x_pose": TextSubstitution(text=str(robot_unknown["x_pose"])),
+    #                 "y_pose": TextSubstitution(text=str(robot_unknown["y_pose"])),
+    #                 "z_pose": TextSubstitution(text=str(robot_unknown["z_pose"])),
+    #                 "robot_name": robot_unknown["name"],
+    #                 "turtlebot_type": TextSubstitution(text="waffle"),
+    #             }.items(),
+    #             condition=UnlessCondition(known_init_poses),
+    #         )
+    #     )
 
     # Define commands for launching the navigation instances
     nav_instances_cmds = []
     for robot in robots_known_poses:
         params_file = LaunchConfiguration(f"{robot['name']}_params_file")
 
-        group = GroupAction(
-            [
-                IncludeLaunchDescription(
-                    PythonLaunchDescriptionSource(
-                        os.path.join(launch_dir, "rviz_launch.py")
-                    ),
-                    condition=IfCondition(use_rviz),
-                    launch_arguments={
-                        "namespace": TextSubstitution(text=robot["name"]),
-                        "use_namespace": "True",
-                        "rviz_config": rviz_config_file,
-                    }.items(),
-                ),
-                IncludeLaunchDescription(
-                    PythonLaunchDescriptionSource(
-                        os.path.join(launch_dir_map_merge, "tb3_simulation_launch.py")
-                    ),
-                    launch_arguments={
-                        "namespace": robot["name"],
-                        "use_namespace": "True",
-                        "map": map_yaml_file,
-                        "use_sim_time": "True",
-                        "params_file": params_file,
-                        "autostart": autostart,
-                        "use_rviz": "False",
-                        "use_simulator": "False",
-                        "headless": "False",
-                        "slam": "True",
-                        "slam_toolbox": slam_toolbox,
-                        "slam_gmapping": slam_gmapping,
-                        "use_robot_state_pub": use_robot_state_pub,
-                    }.items(),
-                ),
-                LogInfo(
-                    condition=IfCondition(log_settings),
-                    msg=["Launching ", robot["name"]],
-                ),
-                LogInfo(
-                    condition=IfCondition(log_settings),
-                    msg=[robot["name"], " map yaml: ", map_yaml_file],
-                ),
-                LogInfo(
-                    condition=IfCondition(log_settings),
-                    msg=[robot["name"], " params yaml: ", params_file],
-                ),
-                LogInfo(
-                    condition=IfCondition(log_settings),
-                    msg=[robot["name"], " rviz config file: ", rviz_config_file],
-                ),
-                LogInfo(
-                    condition=IfCondition(log_settings),
-                    msg=[
-                        robot["name"],
-                        " using robot state pub: ",
-                        use_robot_state_pub,
-                    ],
-                ),
-                LogInfo(
-                    condition=IfCondition(log_settings),
-                    msg=[robot["name"], " autostart: ", autostart],
-                ),
-            ]
-        )
+        # group = GroupAction(
+        #     [
+        #         IncludeLaunchDescription(
+        #             PythonLaunchDescriptionSource(
+        #                 os.path.join(launch_dir, "rviz_launch.py")
+        #             ),
+        #             condition=IfCondition(use_rviz),
+        #             launch_arguments={
+        #                 "namespace": TextSubstitution(text=robot["name"]),
+        #                 "use_namespace": "True",
+        #                 "rviz_config": rviz_config_file,
+        #             }.items(),
+        #         ),
+        #         IncludeLaunchDescription(
+        #             PythonLaunchDescriptionSource(
+        #                 os.path.join(launch_dir_map_merge, "tb3_simulation_launch.py")
+        #             ),
+        #             launch_arguments={
+        #                 "namespace": robot["name"],
+        #                 "use_namespace": "True",
+        #                 "map": map_yaml_file,
+        #                 "use_sim_time": "True",
+        #                 # "params_file": params_file,
+        #                 "autostart": autostart,
+        #                 "use_rviz": "False",
+        #                 "use_simulator": "False",
+        #                 "headless": "False",
+        #                 "slam": "True",
+        #                 "slam_toolbox": slam_toolbox,
+        #                 "slam_gmapping": slam_gmapping,
+        #                 "use_robot_state_pub": use_robot_state_pub,
+        #             }.items(),
+        #         ),
+        #         LogInfo(
+        #             condition=IfCondition(log_settings),
+        #             msg=["Launching ", robot["name"]],
+        #         ),
+        #         LogInfo(
+        #             condition=IfCondition(log_settings),
+        #             msg=[robot["name"], " map yaml: ", map_yaml_file],
+        #         ),
+        #         # LogInfo(
+        #         #     condition=IfCondition(log_settings),
+        #         #     msg=[robot["name"], " params yaml: ", params_file],
+        #         # ),
+        #         LogInfo(
+        #             condition=IfCondition(log_settings),
+        #             msg=[robot["name"], " rviz config file: ", rviz_config_file],
+        #         ),
+        #         LogInfo(
+        #             condition=IfCondition(log_settings),
+        #             msg=[
+        #                 robot["name"],
+        #                 " using robot state pub: ",
+        #                 use_robot_state_pub,
+        #             ],
+        #         ),
+        #         LogInfo(
+        #             condition=IfCondition(log_settings),
+        #             msg=[robot["name"], " autostart: ", autostart],
+        #         ),
+        #     ]
+        # )
 
         nav_instances_cmds.append(group)
 
