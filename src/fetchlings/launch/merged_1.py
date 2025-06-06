@@ -8,6 +8,17 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
+
+    # shit i need
+        # - gzserver
+        # - gzclient
+        # - multi_robot_launch.py for passing in arg
+            # - this needs to be modified with multi_robot_launch_with_nav.py
+                # - spawn n robots
+                # - SLAM
+                # - nav2
+                # - explore_lite
+        # - aruco box
     
     cur_pkg = get_package_share_directory('fetchlings')
     gazebo_pkg = get_package_share_directory('gazebo_ros')
@@ -90,19 +101,6 @@ def generate_launch_description():
                 'progress_timeout': 80.0, # time for recovery if fall
                 'planner_frequency': 1.0, # increase freq Hz for planner
             }
-            # /**: default
-            #   ros__parameters:
-            #     robot_base_frame: base_link
-            #     costmap_topic: map
-            #     costmap_updates_topic: map_updates
-            #     visualize: true
-            #     planner_frequency: 0.25
-            #     progress_timeout: 30.0
-            #     potential_scale: 3.0
-            #     orientation_scale: 0.0
-            #     gain_scale: 1.0
-            #     transform_tolerance: 0.3
-            #     min_frontier_size: 0.75
         ],
         remappings=[("/tf", "tf"), ("/tf_static", "tf_static")]
     )
@@ -141,47 +139,43 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(gzclient_launch),
         ),
-        # # turtle publisher node launch via their own launch file
-        # IncludeLaunchDescription(
-        #     PythonLaunchDescriptionSource(robot_state_publisher_launch),
-        #     launch_arguments={
-        #         'use_sim_time': 'true',
-        #         'namespace': 
-        #     }.items(),
-        # ),
-
-        
-        # actual turtles via their own launch file
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(spawn_turtlebots_launch),
-            launch_arguments={
-                'num_robots': LaunchConfiguration('num_robots'),
-                'use_sim_time': 'true',
-            }.items(),
-        ),
 
         # spawn aruco box model in env
         spawn_aruco_box,
 
-        # slam
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(slam_tlbx_launch),
-            launch_arguments={
-                'use_sim_time': 'true'
-            }.items()
-        ),
+        # ==================== ALL OF BELOW PRESUMABLY
+        # ==================== REPLACED BY MULTI_ROBOT_LAUNCH.PY?????
+        # # actual turtles via their own launch file
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource(spawn_turtlebots_launch),
+        #     launch_arguments={
+        #         'num_robots': LaunchConfiguration('num_robots'),
+        #         'use_sim_time': 'true',
+        #     }.items(),
+        # ),
 
-        # nav2
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(nav2_launch),
-            launch_arguments={
-                'use_sim_time': 'true',
-                'params_file': nav2_params_path
-            }.items()
-        ),
 
-        # m-explore-ros2
-        explore_node,
+        # # slam
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource(slam_tlbx_launch),
+        #     launch_arguments={
+        #         'use_sim_time': 'true'
+        #     }.items()
+        # ),
+
+        # # nav2
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource(nav2_launch),
+        #     launch_arguments={
+        #         'use_sim_time': 'true',
+        #         'params_file': nav2_params_path
+        #     }.items()
+        # ),
+
+        # # m-explore-ros2
+        # explore_node,
+        # ==================== ALL OF ABOVE PRESUMABLY
+        # ==================== REPLACED BY MULTI_ROBOT_LAUNCH.PY?????
 
         # aruco tracker
         IncludeLaunchDescription(

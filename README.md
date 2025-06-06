@@ -30,6 +30,7 @@ fi
 
 ## Dependencies
 `pip install scipy opencv-contrib-python catkin_pkg "empy<4" "lark-parser>=0.11,<1.2"`
+`sudo apt install ros-humble-navigation2 ros-humble-nav2-bringup`
 
 There are also some git submodules, and they should all be working, but if at any time need to update them...
 
