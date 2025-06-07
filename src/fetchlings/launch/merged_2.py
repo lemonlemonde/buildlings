@@ -40,6 +40,8 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import PushRosNamespace, Node
 
+from nav2_common.launch.rewritten_yaml import RewrittenYaml
+
 #             # - this needs to be merged with multi_robot_launch_with_nav.py
 # - spawn n robots
 # - SLAM
@@ -139,7 +141,7 @@ def launch_setup(context, *args, **kwargs):
             package="explore_lite",
             executable="explore",
             name="explore_node",
-            namespace=robo_namespace,
+            # namespace=robo_namespace,
             output="screen",
             parameters=[
                 explore_params_path,  # base config
@@ -158,10 +160,44 @@ def launch_setup(context, *args, **kwargs):
         # slam
         slam_tlbx_launch_action = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(slam_tlbx_launch),
-            launch_arguments={"use_sim_time": "true"}.items(),
+            launch_arguments={
+                "use_sim_time": "true",
+            }.items(),
         )
 
         # nav2
+        # rewrite the `nav2_waffle_pi.yaml` configs at runtime for namespace
+        param_subs = {
+            'odom_frame_id': f'{robo_namespace}/odom',
+            'odom_topic': f'{robo_namespace}/odom',
+            'base_frame_id': f'{robo_namespace}/base_footprint',
+            'robot_base_frame': f'{robo_namespace}/base_link',
+            'global_frame_id': f'{robo_namespace}/map',
+            'global_frame': f'{robo_namespace}/map',
+
+        }
+
+        rewritten_params = RewrittenYaml (
+            source_file= nav2_params_path,
+            # i'm not really sure what `root_key=namespace` does
+            param_rewrites= {
+                'amcl.ros__parameters.base_frame_id': f'{robo_namespace}/base_footprint',
+                'amcl.ros__parameters.global_frame_id': f'{robo_namespace}/map',
+                'amcl.ros__parameters.odom_frame_id': f'{robo_namespace}/odom',
+                'bt_navigator.ros__parameters.robot_base_frame': f'{robo_namespace}/base_link',
+                'bt_navigator.ros__parameters.odom_topic': f'{robo_namespace}/odom',
+                'local_costmap.local_costmap.ros__parameters.global_frame': f'{robo_namespace}/odom',
+                'local_costmap.local_costmap.ros__parameters.robot_base_frame': f'{robo_namespace}/base_link',
+                'global_costmap.global_costmap.ros__parameters.global_frame': f'{robo_namespace}/map',
+                'global_costmap.global_costmap.ros__parameters.robot_base_frame': f'{robo_namespace}/base_link',
+                'recoveries_server.ros__parameters.global_frame':  f'{robo_namespace}/odom',
+                'recoveries_server.ros__parameters.robot_base_frame':  f'{robo_namespace}/base_link',
+            },
+            convert_types=True
+        )
+
+        # rewritten_params will have `perform()` at launch time
+            # then it will return the temp params file that has the substitutions
         nav2_launch_action = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(nav2_launch),
             launch_arguments={
