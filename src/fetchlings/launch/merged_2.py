@@ -80,7 +80,7 @@ def launch_setup(context, *args, **kwargs):
     
     # nav2
     nav2_pkg = get_package_share_directory("turtlebot3_navigation2")
-    nav2_launch = os.path.join(nav2_pkg, "launch", "navigation2.launch.py")
+    nav2_launch = os.path.join(cur_pkg, "launch", "navigation2_launch.py")
     nav2_params_path = os.path.join(cur_pkg, "params", "nav2_waffle_pi.yaml")
 
     # nav2-bringup
@@ -104,7 +104,7 @@ def launch_setup(context, *args, **kwargs):
             ),
             launch_arguments={
                 "use_sim_time": use_sim_time,
-                "frame_prefix": robo_namespace,
+                "frame_prefix": f'{robo_namespace}',
             }.items(),
         )
 
@@ -162,21 +162,21 @@ def launch_setup(context, *args, **kwargs):
             PythonLaunchDescriptionSource(slam_tlbx_launch),
             launch_arguments={
                 "use_sim_time": "true",
+                'namespace': robo_namespace
             }.items(),
         )
 
         # nav2
         # rewrite the `nav2_waffle_pi.yaml` configs at runtime for namespace
-        param_subs = {
-            'odom_frame_id': f'{robo_namespace}/odom',
-            'odom_topic': f'{robo_namespace}/odom',
-            'base_frame_id': f'{robo_namespace}/base_footprint',
-            'robot_base_frame': f'{robo_namespace}/base_link',
-            'global_frame_id': f'{robo_namespace}/map',
-            'global_frame': f'{robo_namespace}/map',
+        # param_subs = {
+        #     'odom_frame_id': f'{robo_namespace}/odom',
+        #     'odom_topic': f'{robo_namespace}/odom',
+        #     'base_frame_id': f'{robo_namespace}/base_footprint',
+        #     'robot_base_frame': f'{robo_namespace}/base_link',
+        #     'global_frame_id': f'{robo_namespace}/map',
+        #     'global_frame': f'{robo_namespace}/map',
 
-        }
-
+        # }
         rewritten_params = RewrittenYaml (
             source_file= nav2_params_path,
             # i'm not really sure what `root_key=namespace` does
@@ -184,27 +184,36 @@ def launch_setup(context, *args, **kwargs):
                 'amcl.ros__parameters.base_frame_id': f'{robo_namespace}/base_footprint',
                 'amcl.ros__parameters.global_frame_id': f'{robo_namespace}/map',
                 'amcl.ros__parameters.odom_frame_id': f'{robo_namespace}/odom',
-                'bt_navigator.ros__parameters.robot_base_frame': f'{robo_namespace}/base_link',
+                'bt_navigator.ros__parameters.robot_base_frame': f'{robo_namespace}/base_footprint',
                 'bt_navigator.ros__parameters.odom_topic': f'{robo_namespace}/odom',
                 'local_costmap.local_costmap.ros__parameters.global_frame': f'{robo_namespace}/odom',
-                'local_costmap.local_costmap.ros__parameters.robot_base_frame': f'{robo_namespace}/base_link',
+                'local_costmap.local_costmap.ros__parameters.robot_base_frame': f'{robo_namespace}/base_footprint',
                 'global_costmap.global_costmap.ros__parameters.global_frame': f'{robo_namespace}/map',
-                'global_costmap.global_costmap.ros__parameters.robot_base_frame': f'{robo_namespace}/base_link',
+                'global_costmap.global_costmap.ros__parameters.robot_base_frame': f'{robo_namespace}/base_footprint',
                 'recoveries_server.ros__parameters.global_frame':  f'{robo_namespace}/odom',
-                'recoveries_server.ros__parameters.robot_base_frame':  f'{robo_namespace}/base_link',
+                'recoveries_server.ros__parameters.robot_base_frame':  f'{robo_namespace}/base_footprint',
             },
             convert_types=True
         )
 
-        # rewritten_params will have `perform()` at launch time
-            # then it will return the temp params file that has the substitutions
         nav2_launch_action = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(nav2_launch),
             launch_arguments={
-                "use_sim_time": "true",
-                "params_file": nav2_params_path,
+                'use_sim_time': 'true',
+                'namespace': robo_namespace,
+                'use_namespace': 'true',
+                'params_file': rewritten_params,
             }.items(),
         )
+
+        # transform conversion if needed
+        # static_tf_pub = Node(
+        #     package='tf2_ros',
+        #     executable='static_transform_publisher',
+        #     name='base_link_to_base_footprint',
+        #     namespace=robo_namespace,
+        #     arguments=['0', '0', '0', '0', '0', '0', f'{robo_namespace}/base_footprint', f'{robo_namespace}/base_link'],
+        # )
 
         robo_cmd_list.append(
             GroupAction(
@@ -214,17 +223,15 @@ def launch_setup(context, *args, **kwargs):
                     spawn_turtlebot_cmd,
                     explore_node,
                     slam_tlbx_launch_action,
-                    nav2_launch_action
+                    nav2_launch_action,
+                    # static_tf_pub
                 ]
             )
         )
 
-    actions = []
-    # append spawn cmds
-    actions.extend(robo_cmd_list)
 
     # shutdown
-    actions.append(
+    robo_cmd_list.append(
         RegisterEventHandler(
             OnShutdown(
                 on_shutdown=lambda event, context: [
@@ -236,7 +243,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     # opaque function will add these into the launch description
-    return actions
+    return robo_cmd_list
 
 
 def generate_launch_description():
