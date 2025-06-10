@@ -82,6 +82,8 @@ def launch_setup(context, *args, **kwargs):
     nav2_pkg = get_package_share_directory("turtlebot3_navigation2")
     nav2_launch = os.path.join(cur_pkg, "launch", "navigation2_launch.py")
     nav2_params_path = os.path.join(cur_pkg, "params", "nav2_waffle_pi.yaml")
+    nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
+
 
     # nav2-bringup
     bringup_dir = get_package_share_directory("nav2_bringup")
@@ -196,15 +198,31 @@ def launch_setup(context, *args, **kwargs):
             convert_types=True
         )
 
+
+        remapping_rules = [
+            (f'/{robo_namespace}/{robo_namespace}/odom', f'/{robo_namespace}/odom'),
+            (f'/{robo_namespace}/{robo_namespace}/cmd_vel', f'/{robo_namespace}/cmd_vel'),
+            # Add other double-namespaced topics as needed
+        ]
         nav2_launch_action = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(nav2_launch),
             launch_arguments={
                 'use_sim_time': 'true',
                 'namespace': robo_namespace,
-                'use_namespace': 'true',
+                'use_namespace': 'false',
                 'params_file': rewritten_params,
             }.items(),
         )
+
+        # nav2_launch_action = IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource([nav2_launch_file_dir, '/bringup_launch.py']),
+        #     launch_arguments={
+        #         'map': map_dir,
+        #         'use_sim_time': use_sim_time,
+        #         'namespace':LaunchConfiguration('namespace'),
+        #         'use_namespace':LaunchConfiguration('use_namespace'),
+        #         'params_file': nav2_params_path}.items(),
+        # ),
 
         # transform conversion if needed
         # static_tf_pub = Node(

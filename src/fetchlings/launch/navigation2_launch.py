@@ -54,7 +54,7 @@ def generate_launch_description():
                 'param',
                 param_file_name))
 
-    nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
+    nav2_launch_file_dir = os.path.join(get_package_share_directory('fetchlings'), 'launch')
 
     rviz_config_dir = os.path.join(
         get_package_share_directory('turtlebot3_navigation2'),
