@@ -58,7 +58,7 @@ def launch_setup(context, *args, **kwargs):
 
     # max 6 robots for now
     pose = [[-2, -0.5], [0.5, -2], [2.0, 0.5], [-0.5, 2], [-4.5, 3.0], [-0.5, 0.0]]
-    urdf_path = os.path.join(
+    sdf_path = os.path.join(
         get_package_share_directory("turtlebot3_gazebo"),
         "models",
         model_folder,
@@ -68,49 +68,57 @@ def launch_setup(context, *args, **kwargs):
         get_package_share_directory("turtlebot3_gazebo"), "models", model_folder, "tmp"
     )
     
+    # robot state publisher
+    urdf_file_name = 'turtlebot3_' + TURTLEBOT3_MODEL + '.urdf'
+    urdf_path = os.path.join(
+        get_package_share_directory('turtlebot3_gazebo'),
+        'urdf',
+        urdf_file_name)
+    with open(urdf_path, 'r') as infp:
+        robot_desc = infp.read()
+    
     cur_pkg = get_package_share_directory("fetchlings")
     turtlebot3_launch_dir = os.path.join(get_package_share_directory("turtlebot3_gazebo"), "launch")
     
     # slam
     slam_tlbx_pkg = get_package_share_directory("slam_toolbox")
-    slam_tlbx_launch = os.path.join(slam_tlbx_pkg, "launch", "online_async_launch.py")
+    slam_tlbx_launch = os.path.join(cur_pkg, "launch", "online_async_launch.py")
     
     # explore params
     explore_params_path = os.path.join(cur_pkg, "params", "explore_params.yaml")
     
     # nav2
-    nav2_pkg = get_package_share_directory("turtlebot3_navigation2")
     nav2_launch = os.path.join(cur_pkg, "launch", "navigation2_launch.py")
     nav2_params_path = os.path.join(cur_pkg, "params", "nav2_waffle_pi.yaml")
-    nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
-
-
-    # nav2-bringup
-    bringup_dir = get_package_share_directory("nav2_bringup")
-    bringup_launch_dir = os.path.join(bringup_dir, "launch")
     
     # multirobot_map_merge launch dir
     #   they have modified launch files?
-    map_merge_dir = get_package_share_directory("multirobot_map_merge")
-    launch_dir_map_merge = os.path.join(map_merge_dir, "launch", "tb3_simulation")
+    # map_merge_dir = get_package_share_directory("multirobot_map_merge")
+    # launch_dir_map_merge = os.path.join(map_merge_dir, "launch", "tb3_simulation")
 
 
     robo_cmd_list = []
 
     for count in range(number_of_robots):
         robo_namespace = f"{namespace}_{count+1}"
-        
-        state_pub_cmd = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(turtlebot3_launch_dir, "robot_state_publisher.launch.py")
-            ),
-            launch_arguments={
-                "use_sim_time": use_sim_time,
-                "frame_prefix": f'{robo_namespace}',
-            }.items(),
+
+        state_pub_node = Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            name='robot_state_publisher',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'robot_description': robot_desc,
+                'frame_prefix': f'{robo_namespace}/'
+            }],
+            remappings=[
+                ('/tf', 'tf'),
+                ('/tf_static', 'tf_static')
+            ]
         )
 
-        tree = ET.parse(urdf_path)
+        tree = ET.parse(sdf_path)
         root = tree.getroot()
         for odom_frame_tag in root.iter("odometry_frame"):
             odom_frame_tag.text = f"{robo_namespace}/odom"
@@ -118,10 +126,47 @@ def launch_setup(context, *args, **kwargs):
             base_frame_tag.text = f"{robo_namespace}/base_footprint"
         for scan_frame_tag in root.iter("frame_name"):
             scan_frame_tag.text = f"{robo_namespace}/base_scan"
-        urdf_modified = ET.tostring(tree.getroot(), encoding="unicode")
-        urdf_modified = '<?xml version="1.0" ?>\n' + urdf_modified
+            
+        # More explicit plugin modification for diff_drive
+        for plugin in root.iter("plugin"):
+            if plugin.get("name") == "turtlebot3_diff_drive":
+                # Remove existing ros section if present
+                existing_ros = plugin.find("ros")
+                if existing_ros is not None:
+                    plugin.remove(existing_ros)
+                
+                # Create new ros section with namespace
+                ros_element = ET.SubElement(plugin, "ros")
+                namespace_element = ET.SubElement(ros_element, "namespace")
+                namespace_element.text = robo_namespace
+                
+                # Also try setting remappings explicitly
+                remappings_element = ET.SubElement(ros_element, "remapping")
+                remappings_element.text = "/tf:=tf"  # Remap /tf to tf (relative)
+            if plugin.get("name") == "turtlebot3_laserscan":
+                # Find and modify update_rate
+                for update_rate in plugin.iter("update_rate"):
+                    update_rate.text = "5"  # Reduce from default (usually 30) to 5 Hz
+                
+                # Find and modify samples  
+                for samples in plugin.iter("samples"):
+                    samples.text = "360"  # Reduce if higher
+                    
+                # Add or modify ros section
+                ros_element = plugin.find("ros")
+                if ros_element is None:
+                    ros_element = ET.SubElement(plugin, "ros")
+                
+                namespace_element = ET.SubElement(ros_element, "namespace")
+                namespace_element.text = robo_namespace
+            
+            
+        sdf_modified = ET.tostring(tree.getroot(), encoding="unicode")
+        sdf_modified = '<?xml version="1.0" ?>\n' + sdf_modified
         with open(f"{save_path}{count+1}.sdf", "w") as file:
-            file.write(urdf_modified)
+            file.write(sdf_modified)
+            
+            
 
 
         # spawn turtlebot3
@@ -170,40 +215,25 @@ def launch_setup(context, *args, **kwargs):
 
         # nav2
         # rewrite the `nav2_waffle_pi.yaml` configs at runtime for namespace
-        # param_subs = {
-        #     'odom_frame_id': f'{robo_namespace}/odom',
-        #     'odom_topic': f'{robo_namespace}/odom',
-        #     'base_frame_id': f'{robo_namespace}/base_footprint',
-        #     'robot_base_frame': f'{robo_namespace}/base_link',
-        #     'global_frame_id': f'{robo_namespace}/map',
-        #     'global_frame': f'{robo_namespace}/map',
-
-        # }
         rewritten_params = RewrittenYaml (
             source_file= nav2_params_path,
-            # i'm not really sure what `root_key=namespace` does
+            root_key=robo_namespace,
             param_rewrites= {
-                'amcl.ros__parameters.base_frame_id': f'{robo_namespace}/base_footprint',
-                'amcl.ros__parameters.global_frame_id': f'{robo_namespace}/map',
-                'amcl.ros__parameters.odom_frame_id': f'{robo_namespace}/odom',
-                'bt_navigator.ros__parameters.robot_base_frame': f'{robo_namespace}/base_footprint',
-                'bt_navigator.ros__parameters.odom_topic': f'{robo_namespace}/odom',
-                'local_costmap.local_costmap.ros__parameters.global_frame': f'{robo_namespace}/odom',
-                'local_costmap.local_costmap.ros__parameters.robot_base_frame': f'{robo_namespace}/base_footprint',
-                'global_costmap.global_costmap.ros__parameters.global_frame': f'{robo_namespace}/map',
-                'global_costmap.global_costmap.ros__parameters.robot_base_frame': f'{robo_namespace}/base_footprint',
-                'recoveries_server.ros__parameters.global_frame':  f'{robo_namespace}/odom',
-                'recoveries_server.ros__parameters.robot_base_frame':  f'{robo_namespace}/base_footprint',
+                'amcl.ros__parameters.base_frame_id': 'base_footprint',
+                'amcl.ros__parameters.global_frame_id': 'map',
+                'amcl.ros__parameters.odom_frame_id': 'odom',
+                'bt_navigator.ros__parameters.robot_base_frame': 'base_footprint',
+                'bt_navigator.ros__parameters.odom_topic': 'odom',
+                'local_costmap.local_costmap.ros__parameters.global_frame': 'odom',
+                'local_costmap.local_costmap.ros__parameters.robot_base_frame': 'base_footprint',
+                'global_costmap.global_costmap.ros__parameters.global_frame': 'map',
+                'global_costmap.global_costmap.ros__parameters.robot_base_frame': 'base_footprint',
+                'recoveries_server.ros__parameters.global_frame':  'odom',
+                'recoveries_server.ros__parameters.robot_base_frame':  'base_footprint',
             },
             convert_types=True
         )
 
-
-        remapping_rules = [
-            (f'/{robo_namespace}/{robo_namespace}/odom', f'/{robo_namespace}/odom'),
-            (f'/{robo_namespace}/{robo_namespace}/cmd_vel', f'/{robo_namespace}/cmd_vel'),
-            # Add other double-namespaced topics as needed
-        ]
         nav2_launch_action = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(nav2_launch),
             launch_arguments={
@@ -214,35 +244,16 @@ def launch_setup(context, *args, **kwargs):
             }.items(),
         )
 
-        # nav2_launch_action = IncludeLaunchDescription(
-        #     PythonLaunchDescriptionSource([nav2_launch_file_dir, '/bringup_launch.py']),
-        #     launch_arguments={
-        #         'map': map_dir,
-        #         'use_sim_time': use_sim_time,
-        #         'namespace':LaunchConfiguration('namespace'),
-        #         'use_namespace':LaunchConfiguration('use_namespace'),
-        #         'params_file': nav2_params_path}.items(),
-        # ),
-
-        # transform conversion if needed
-        # static_tf_pub = Node(
-        #     package='tf2_ros',
-        #     executable='static_transform_publisher',
-        #     name='base_link_to_base_footprint',
-        #     namespace=robo_namespace,
-        #     arguments=['0', '0', '0', '0', '0', '0', f'{robo_namespace}/base_footprint', f'{robo_namespace}/base_link'],
-        # )
 
         robo_cmd_list.append(
             GroupAction(
                 [
                     PushRosNamespace(robo_namespace),
-                    state_pub_cmd,
+                    state_pub_node,
                     spawn_turtlebot_cmd,
                     explore_node,
                     slam_tlbx_launch_action,
                     nav2_launch_action,
-                    # static_tf_pub
                 ]
             )
         )
@@ -250,15 +261,16 @@ def launch_setup(context, *args, **kwargs):
 
     # shutdown
     robo_cmd_list.append(
-        RegisterEventHandler(
-            OnShutdown(
-                on_shutdown=lambda event, context: [
-                    os.remove(f"{save_path}{count+1}.sdf")
-                    for count in range(number_of_robots)
-                ]
-            )
+    RegisterEventHandler(
+        OnShutdown(
+            on_shutdown=lambda event, context: [
+                os.remove(f"{save_path}{i+1}.sdf")
+                for i in range(number_of_robots)
+                if os.path.exists(f"{save_path}{i+1}.sdf")
+            ]
         )
     )
+)
 
     # opaque function will add these into the launch description
     return robo_cmd_list

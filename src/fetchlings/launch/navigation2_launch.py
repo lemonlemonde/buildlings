@@ -30,12 +30,6 @@ ROS_DISTRO = os.environ.get('ROS_DISTRO')
 
 def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
-    map_dir = LaunchConfiguration(
-        'map',
-        default=os.path.join(
-            get_package_share_directory('turtlebot3_navigation2'),
-            'map',
-            'map.yaml'))
 
     param_file_name = TURTLEBOT3_MODEL + '.yaml'
     if ROS_DISTRO == 'humble':
@@ -54,7 +48,8 @@ def generate_launch_description():
                 'param',
                 param_file_name))
 
-    nav2_launch_file_dir = os.path.join(get_package_share_directory('fetchlings'), 'launch')
+    cur_pkg = get_package_share_directory("fetchlings")
+
 
     rviz_config_dir = os.path.join(
         get_package_share_directory('turtlebot3_navigation2'),
@@ -62,10 +57,6 @@ def generate_launch_description():
         'tb3_navigation2.rviz')
 
     return LaunchDescription([
-        DeclareLaunchArgument(
-            'map',
-            default_value=map_dir,
-            description='Full path to map file to load'),
 
         DeclareLaunchArgument(
             'params_file',
@@ -88,9 +79,8 @@ def generate_launch_description():
             description='Whether to use namespace or not'),
 
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([nav2_launch_file_dir, '/bringup_launch.py']),
+            PythonLaunchDescriptionSource(os.path.join(cur_pkg, "launch", "bringup_launch.py")),
             launch_arguments={
-                'map': map_dir,
                 'use_sim_time': use_sim_time,
                 'namespace':LaunchConfiguration('namespace'),
                 'use_namespace':LaunchConfiguration('use_namespace'),
